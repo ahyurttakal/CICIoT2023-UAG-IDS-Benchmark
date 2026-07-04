@@ -6,7 +6,7 @@ date-released: "2026-01-01"
 authors:
   - family-names: "Yurttakal"
     given-names: "Ahmet Hasim"
-    email: "ahyurttakal@gmail.com"
+    email: "ahyurttakal@aku.edu.tr"
 repository-code: "https://github.com/ahyurttakal/CICIoT2023-UAG-IDS-Benchmark"
 license: "MIT"
 preferred-citation:
@@ -15,4 +15,8 @@ preferred-citation:
   authors:
     - family-names: "Yurttakal"
       given-names: "Ahmet Hasim"
+    - family-names: "Çetinkaya"
+      given-names: "Zeynep"
+    - family-names: "Horasan"
+      given-names: "Fahrettin"
   status: "submitted"
