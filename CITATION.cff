@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the associated manuscript and the CICIoT2023 dataset paper."
+title: "CICIoT2023 UAG-IDS Benchmark"
+version: "1.0.0"
+date-released: "2026-01-01"
+authors:
+  - family-names: "Yurttakal"
+    given-names: "Ahmet Hasim"
+    email: "ahyurttakal@gmail.com"
+repository-code: "https://github.com/ahyurttakal/CICIoT2023-UAG-IDS-Benchmark"
+license: "MIT"
+preferred-citation:
+  type: article
+  title: "Beyond Random Splits: A Leakage-Controlled Evaluation of Unseen Attack-Family Generalization in IoT Intrusion Detection Systems"
+  authors:
+    - family-names: "Yurttakal"
+      given-names: "Ahmet Hasim"
+  status: "submitted"
