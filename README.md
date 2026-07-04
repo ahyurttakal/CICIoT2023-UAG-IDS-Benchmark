@@ -29,16 +29,13 @@ CICIoT2023-UAG-IDS-Benchmark/
 ├── .gitignore
 ├── data/
 │   └── README.md
-├── docs/
-│   └── peerj_upload_notes.md
 ├── outputs/
 │   └── .gitkeep
 └── scripts/
     ├── 01_prepare_ciciot2023_working_dataset.py
     ├── 02_run_uag_ids_benchmark.py
-    ├── 03_run_optuna_xgboost_balanced_loafo.py
-    └── 04_generate_section5_statistics_and_figures.py
-```
+    └── 03_run_optuna_xgboost_balanced_loafo.py
+   ```
 
 ## Dataset Information
 
@@ -155,29 +152,6 @@ python scripts/03_run_optuna_xgboost_balanced_loafo.py
 
 This optional supplementary experiment produces Optuna-TPE-XGBoost LOAFO results.
 
-### Step 5: Generate statistical tables and manuscript figures
-
-After running the main benchmark, run:
-
-```bash
-python scripts/04_generate_section5_statistics_and_figures.py --input "CICIoT2023_UAG_IDS_BALANCED_FINAL/results_all_uag_ids_balanced_final.csv" --output "section5_outputs"
-```
-
-This produces:
-
-```text
-section5_outputs/table8_friedman_mean_ranks.csv
-section5_outputs/table8_friedman_mean_ranks_formatted.csv
-section5_outputs/tableS4_wilcoxon_holm_posthoc.csv
-section5_outputs/tableS5_significant_wilcoxon_holm_pairs.csv
-section5_outputs/figure1_combined_random_vs_fileheldout.png
-section5_outputs/figure1_combined_random_vs_fileheldout.pdf
-section5_outputs/figure3_family_level_macro_f1_heatmap.png
-section5_outputs/figure3_family_level_macro_f1_heatmap.pdf
-section5_outputs/figure4_attack_recall_vs_false_positive_rate.png
-section5_outputs/figure4_attack_recall_vs_false_positive_rate.pdf
-```
-
 ## Methodology
 
 The benchmark follows five main stages.
@@ -279,7 +253,7 @@ Neto, E. C. P., Dadkhah, S., Ferreira, R., Zohourian, A., Lu, R., & Ghorbani, A.
 
 ### Manuscript citation
 
-Yurttakal, A. H. Beyond Random Splits: A Leakage-Controlled Evaluation of Unseen Attack-Family Generalization in IoT Intrusion Detection Systems. Manuscript submitted for peer review.
+Submitted
 
 ## License
 
