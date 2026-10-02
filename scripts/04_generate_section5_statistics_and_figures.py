@@ -1,39 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-PeerJ Computer Science makalesi için Section 5 istatistik tabloları ve figürleri.
-
-Üretilen çıktılar
------------------
-1. Figure 1:
-   Random split ve source-file-held-out sonuçlarını tek figürde karşılaştırır.
-   Metrikler: Macro-F1, Balanced Accuracy, MCC
-
-2. Figure 3:
-   Held-out saldırı ailesi × model Macro-F1 heatmap
-
-3. Figure 4:
-   Attack Recall - False-Positive Rate trade-off grafiği
-
-4. Table 8:
-   Friedman testi, Kendall's W etki büyüklüğü ve ortalama sıralamalar
-
-5. Supplementary tablolar:
-   Holm düzeltmeli Wilcoxon signed-rank post-hoc karşılaştırmaları
-
-Gerekli paketler
-----------------
-pip install pandas numpy matplotlib scipy
-
-Örnek çalıştırma
-----------------
-python generate_peerj_section5_outputs.py ^
+python generate_outputs.py ^
     --input "results_all_uag_ids_balanced_final.csv" ^
-    --output "peerj_section5_outputs"
+    --output "outputs"
 
-Windows PowerShell için:
-python generate_peerj_section5_outputs.py `
-    --input "results_all_uag_ids_balanced_final.csv" `
-    --output "peerj_section5_outputs"
 """
 
 from __future__ import annotations
@@ -49,10 +19,6 @@ from scipy.stats import friedmanchisquare, rankdata, wilcoxon
 
 warnings.filterwarnings("ignore")
 
-
-# ============================================================
-# SABİTLER
-# ============================================================
 
 MODEL_ORDER = [
     "LogisticRegression",
@@ -92,7 +58,6 @@ FAMILY_DISPLAY = {
     "WEB_MALWARE": "Web Malware",
 }
 
-# Friedman testi ve post-hoc analiz için kullanılacak metrikler
 METRICS = {
     "macro_f1": {
         "display": "Macro-F1",
@@ -120,17 +85,12 @@ METRICS = {
     },
 }
 
-# Figure 1 içinde tek grafikte gösterilecek üç metrik
 FIGURE1_METRICS = [
     ("macro_f1", "Macro-F1"),
     ("balanced_accuracy", "Balanced accuracy"),
     ("mcc", "MCC"),
 ]
 
-
-# ============================================================
-# YARDIMCI FONKSİYONLAR
-# ============================================================
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -162,9 +122,6 @@ def ensure_output_dir(path: Path) -> None:
 
 
 def save_figure(fig: plt.Figure, output_dir: Path, name: str, dpi: int) -> None:
-    """
-    Hem yüksek çözünürlüklü PNG hem de vektörel PDF üretir.
-    """
     fig.savefig(output_dir / f"{name}.png", dpi=dpi, bbox_inches="tight")
     fig.savefig(output_dir / f"{name}.pdf", bbox_inches="tight")
     plt.close(fig)
@@ -177,10 +134,6 @@ def format_p_value(value: float) -> str:
 
 
 def holm_adjust(p_values: list[float]) -> np.ndarray:
-    """
-    Holm step-down correction.
-    statsmodels gerektirmeden çoklu karşılaştırma düzeltmesi uygular.
-    """
     p_values_array = np.asarray(p_values, dtype=float)
     m = len(p_values_array)
 
@@ -203,18 +156,6 @@ def holm_adjust(p_values: list[float]) -> np.ndarray:
 
 
 def paired_rank_biserial(differences: np.ndarray) -> float:
-    """
-    Eşleştirilmiş karşılaştırmalar için rank-biserial effect size.
-
-    Pozitif değer:
-        model_a lehine sonuç
-
-    Negatif değer:
-        model_b lehine sonuç
-
-    false-positive rate için yön kod içinde ters çevrilmektedir.
-    Böylece pozitif değer her zaman model_a lehine yorumlanabilir.
-    """
     differences = np.asarray(differences, dtype=float)
     differences = differences[np.isfinite(differences)]
     differences = differences[differences != 0]
@@ -261,10 +202,6 @@ def validate_columns(df: pd.DataFrame) -> None:
 
 
 def load_results(input_path: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """
-    Ana sonuç dosyasını okur.
-    Successful binary balanced_loafo satırlarını ayırır.
-    """
     if not input_path.exists():
         raise FileNotFoundError(f"Dosya bulunamadı: {input_path}")
 
@@ -289,7 +226,7 @@ def load_results(input_path: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
         + loafo_df["seed"].astype(str)
     )
 
-    # Her eşleştirilmiş blokta beş modelin tamamı olmalı
+
     counts = loafo_df.groupby("block")["model"].nunique()
     complete_blocks = counts[counts.eq(len(MODEL_ORDER))].index
 
@@ -312,22 +249,10 @@ def load_results(input_path: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
     return success_df, loafo_df
 
 
-# ============================================================
-# TABLE 8: FRIEDMAN + KENDALL'S W + MEAN RANKS
-# ============================================================
-
 def generate_statistical_tables(
     loafo_df: pd.DataFrame,
     output_dir: Path,
 ) -> None:
-    """
-    Ana makale için:
-        table8_friedman_mean_ranks.csv
-
-    Supplementary material için:
-        tableS4_wilcoxon_holm_posthoc.csv
-        tableS5_significant_wilcoxon_holm_pairs.csv
-    """
     friedman_rows: list[dict] = []
     posthoc_rows: list[dict] = []
 
@@ -343,7 +268,6 @@ def generate_statistical_tables(
         if pivot.empty:
             continue
 
-        # Rank 1 her zaman en iyi sonucu temsil eder
         ascending = meta["direction"] == "lower"
 
         ranks = pivot.rank(
@@ -354,7 +278,6 @@ def generate_statistical_tables(
 
         mean_ranks = ranks.mean(axis=0)
 
-        # Wilcoxon ve Friedman için her metrikte "higher is better" standardı
         oriented = pivot.copy()
 
         if meta["direction"] == "lower":
@@ -390,9 +313,6 @@ def generate_statistical_tables(
 
         friedman_rows.append(friedman_row)
 
-        # -------------------------------
-        # Holm-corrected pairwise Wilcoxon
-        # -------------------------------
         metric_pair_rows: list[dict] = []
 
         for i, model_a in enumerate(MODEL_ORDER):
@@ -455,7 +375,6 @@ def generate_statistical_tables(
 
     friedman_df = pd.DataFrame(friedman_rows)
 
-    # Makalede kolay okunacak sütun sırası
     table8_columns = [
         "metric",
         "n_blocks",
@@ -478,7 +397,6 @@ def generate_statistical_tables(
         index=False,
     )
 
-    # Word'e veya makaleye daha rahat aktarılabilen formatlı sürüm
     formatted_df = friedman_df.copy()
 
     formatted_df["friedman_chi_square"] = formatted_df[
@@ -529,10 +447,6 @@ def generate_statistical_tables(
         index=False,
     )
 
-
-# ============================================================
-# FIGURE 1: TEK BİRLEŞİK GRAFİK
-# ============================================================
 
 def generate_figure1(
     success_df: pd.DataFrame,
@@ -640,7 +554,6 @@ def generate_figure1(
     ax.grid(axis="y", alpha=0.30)
     ax.legend()
 
-    # Her modelin altına ayrı grup etiketi
     metrics_per_model = len(FIGURE1_METRICS)
 
     for group_index, model in enumerate(MODEL_ORDER):
@@ -673,11 +586,6 @@ def generate_figure1(
         name="figure1_combined_random_vs_fileheldout",
         dpi=dpi,
     )
-
-
-# ============================================================
-# FIGURE 3: FAMILY-LEVEL MACRO-F1 HEATMAP
-# ============================================================
 
 def generate_figure3(
     loafo_df: pd.DataFrame,
@@ -726,7 +634,6 @@ def generate_figure3(
         [FAMILY_DISPLAY[family] for family in FAMILY_ORDER]
     )
 
-    # Hücrelerin içine Macro-F1 değerlerini yaz
     for row_index in range(len(FAMILY_ORDER)):
         for column_index in range(len(MODEL_ORDER)):
             value = heatmap_df.iloc[
@@ -754,10 +661,6 @@ def generate_figure3(
         dpi=dpi,
     )
 
-
-# ============================================================
-# FIGURE 4: ATTACK RECALL - FPR TRADE-OFF
-# ============================================================
 
 def generate_figure4(
     loafo_df: pd.DataFrame,
@@ -839,11 +742,6 @@ def generate_figure4(
         name="figure4_attack_recall_vs_false_positive_rate",
         dpi=dpi,
     )
-
-
-# ============================================================
-# DOĞRULAMA ÖZETİ VE CAPTION DOSYASI
-# ============================================================
 
 def write_validation_summary(
     loafo_df: pd.DataFrame,
